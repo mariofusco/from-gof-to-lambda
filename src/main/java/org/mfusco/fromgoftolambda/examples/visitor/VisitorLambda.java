@@ -4,81 +4,118 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
-public class VisitorLambda {
+public class VisitorLambda
+{
 
-    public static class LambdaVisitor<A> implements Function<Object, A> {
-        private Map<Class<?>, Function<Object, A>> fMap = new HashMap<>();
+  public static class LambdaVisitor<A> implements Function<Object, Optional<A>>
+  {
+    Map<Class<?>, NonTotalFunction<?, A>> fMap = new HashMap<>();
 
-        public <B> Acceptor<A, B> on(Class<B> clazz) {
-            return new Acceptor<>(this, clazz);
-        }
-
-        @Override
-        public A apply( Object o ) {
-            return fMap.get(o.getClass()).apply( o );
-        }
-
-        static class Acceptor<A, B> {
-            private final LambdaVisitor visitor;
-            private final Class<B> clazz;
-
-            public Acceptor( LambdaVisitor<A> visitor, Class<B> clazz ) {
-                this.visitor = visitor;
-                this.clazz = clazz;
-            }
-
-            public LambdaVisitor<A> then(Function<B, A> f) {
-                visitor.fMap.put( clazz, f );
-                return visitor;
-            }
-        }
+    public <B> LambdaVisitor<A> with(NonTotalFunction<B, A> f)
+    {
+      fMap.put(f.clazz, f);
+      return this;
     }
 
-    public static class Square {
-        final double side;
+    @Override
+    public Optional<A> apply(Object o)
+    {
+      return fMap.getOrDefault(o.getClass(), NonTotalFunction.empty()).apply(o);
+    }
+  }
 
-        public Square(double side) {
-            this.side = side;
-        }
+  public static class NonTotalFunction<T, R> implements Function<Object, Optional<R>>
+  {
+    public final Class<T> clazz;
+    private final Function<T, R> fun;
+
+    public NonTotalFunction(Class<T> clazz, Function<T, R> fun)
+    {
+      this.clazz = clazz;
+      this.fun = fun;
     }
 
-    public static class Circle {
-        final double radius;
+    @SuppressWarnings("rawtypes")
+    private static final NonTotalFunction EMPTY = new Empty();
 
-        public Circle(double radius) {
-            this.radius = radius;
-        }
+    @SuppressWarnings("unchecked")
+    @Override
+    public Optional<R> apply(Object o)
+    {
+      if (clazz.isAssignableFrom(o.getClass()))
+        return Optional.of(fun.apply((T) o));
+      else
+        return Optional.empty();
     }
 
-    public static class Rectangle {
-        final double weidht;
-        final double height;
-
-        public Rectangle( double weidht, double height ) {
-            this.weidht = weidht;
-            this.height = height;
-        }
+    public static <A, B> NonTotalFunction<A, B> of(Class<A> cl, Function<A, B> fu)
+    {
+      return new NonTotalFunction<>(cl, fu);
     }
 
-    static Function<Object, Double> areaVisitor = new LambdaVisitor<Double>()
-            .on(Square.class).then( s -> s.side * s.side )
-            .on(Circle.class).then( c -> Math.PI * c.radius * c.radius )
-            .on(Rectangle.class).then( r -> r.height * r.weidht );
-
-    static Function<Object, Double> perimeterVisitor = new LambdaVisitor<Double>()
-            .on(Square.class).then( s -> 4 * s.side )
-            .on(Circle.class).then( c -> 2 * Math.PI * c.radius )
-            .on(Rectangle.class).then( r -> 2 * r.height + 2 * r.weidht );
-
-    public static void main( String[] args ) {
-        List<Object> figures = Arrays.asList( new Circle( 4 ), new Square( 5 ), new Rectangle( 6, 7 ) );
-
-        double totalArea = figures.stream().map( areaVisitor ).reduce( 0.0, (v1, v2) -> v1 + v2 );
-        System.out.println("Total area = " + totalArea);
-
-        double totalPerimeter = figures.stream().map( perimeterVisitor ).reduce( 0.0, (v1, v2) -> v1 + v2 );
-        System.out.println("Total perimeter = " + totalPerimeter);
+    @SuppressWarnings("unchecked")
+    public static <A, B> NonTotalFunction<A, B> empty()
+    {
+      return EMPTY;
     }
+
+    static class Empty extends NonTotalFunction<Void, Void>
+    {
+      public Empty()
+      {
+        super(Void.TYPE, (Void x) -> null);
+      }
+    }
+  }
+
+  public static class Square
+  {
+    final double side;
+
+    public Square(double side)
+    {
+      this.side = side;
+    }
+  }
+
+  public static class Circle
+  {
+    final double radius;
+
+    public Circle(double radius)
+    {
+      this.radius = radius;
+    }
+  }
+
+  public static class Rectangle
+  {
+    final double width;
+    final double height;
+
+    public Rectangle(double width, double height)
+    {
+      this.width = width;
+      this.height = height;
+    }
+  }
+
+  static Function<Object, Optional<Double>> areaVisitor = new LambdaVisitor<Double>()
+      .with(NonTotalFunction.of(Square.class, s -> s.side * s.side))
+      .with(NonTotalFunction.of(Circle.class, c -> Math.PI * c.radius * c.radius))
+      .with(NonTotalFunction.of(Rectangle.class, r -> r.height * r.width));
+
+  static Function<Object, Optional<Double>> perimeterVisitor = new LambdaVisitor<Double>()
+      .with(NonTotalFunction.of(Square.class, s -> 4 * s.side))
+      .with(NonTotalFunction.of(Circle.class, c -> 2 * Math.PI * c.radius));
+
+  public static void main(String[] args)
+  {
+    List<Object> figures = Arrays.asList(new Circle(4), new Square(5), new Rectangle(6, 7));
+    figures.forEach(o -> System.out.println(areaVisitor.apply(o)));
+    figures.forEach(o -> System.out.println(perimeterVisitor.apply(o)));
+  }
 }
