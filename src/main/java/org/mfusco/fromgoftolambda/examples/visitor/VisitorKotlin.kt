@@ -23,6 +23,6 @@ fun main(args: Array<String>) {
     val totalArea = figures.map { areaVisitor(it) }.sum()
     println("Total area = " + totalArea);
 
-    val totalPerimeter = figures.map { perimeterVisitor(it)}.sum()
+    val totalPerimeter = figures.map { perimeterVisitor(it) }.sum()
     println("Total perimeter = " + totalPerimeter);
 }

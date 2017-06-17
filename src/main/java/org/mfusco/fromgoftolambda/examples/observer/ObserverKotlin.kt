@@ -9,7 +9,7 @@ class Observable {
 
     fun unregister(key: Any) = listeners.remove(key)
 
-    var event by Delegates.observable("") { _, _, event -> listeners.values.forEach { listener -> listener(event) } }
+    var event by Delegates.observable("") { _, _, event -> listeners.values.forEach { it(event) } }
 }
 
 fun main(args: Array<String>) {
