@@ -1,10 +1,16 @@
 package org.mfusco.fromgoftolambda.examples.strategy
 
-fun publishText(text: String, filter: (String) -> Boolean, format: (String) -> String) {
-    if (filter(text)) println(format(text))
+open class TextFormatter(val filter: (String) -> Boolean, val format: (String) -> String)
+class PlainTextFormatter : TextFormatter({ true }, { it })
+class ErrorTextFormatter : TextFormatter({ it.startsWith("ERROR") }, { it.toUpperCase() })
+class ShortTextFormatter : TextFormatter({ it.length < 20 }, { it.toLowerCase() })
+
+fun publishText(text: String, textFormatter: TextFormatter) {
+    if (textFormatter.filter(text)) println(textFormatter.format(text))
 }
 
 fun main(args: Array<String>) {
-    publishText("ERROR - something bad happened", { _ -> true }, { it.toUpperCase() })
-    publishText("DEBUG - I'm here", { it.length < 20 }, { it.toLowerCase() })
+    publishText("INFO - all good!", PlainTextFormatter())
+    publishText("ERROR - something bad happened", ErrorTextFormatter())
+    publishText("DEBUG - I'm here", ShortTextFormatter())
 }
