@@ -21,8 +21,8 @@ fun main(args: Array<String>) {
     val figures = listOf(Circle(4.0), Square(5.0), Rectangle(6.0, 7.0))
 
     val totalArea = figures.map { areaVisitor(it) }.sum()
-    println("Total area = " + totalArea);
+    println("Total area = $totalArea")
 
     val totalPerimeter = figures.map { perimeterVisitor(it) }.sum()
-    println("Total perimeter = " + totalPerimeter);
+    println("Total perimeter = $totalPerimeter")
 }
