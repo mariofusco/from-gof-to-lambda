@@ -11,6 +11,6 @@ fun withResource(consumer: (Resource) -> Unit) {
 }
 
 fun main(args: Array<String>) {
-    withResource { it::useResource }
-    withResource { it::employResource }
+    withResource { it.useResource() }
+    withResource { it.employResource() }
 }
