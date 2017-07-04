@@ -1,19 +1,14 @@
 package org.mfusco.fromgoftolambda.examples.chainofresponsibility
 
-import java.util.Optional
-
-fun parseText(file: File): Optional<String> = Optional.ofNullable(file).filter { it.type == File.Type.TEXT }.map { "Text file: ${it.content}" }
-fun parsePresentation(file: File): Optional<String> = Optional.ofNullable(file).filter { it.type == File.Type.PRESENTATION }.map { "Presentation file: ${it.content}" }
-fun parseAudio(file: File): Optional<String> = Optional.ofNullable(file).filter { it.type == File.Type.AUDIO }.map { "Audio file: ${it.content}" }
-fun parseVideo(file: File): Optional<String> = Optional.ofNullable(file).filter { it.type == File.Type.VIDEO }.map { "Video file: ${it.content}" }
+fun parseText(file: File) = if (file.type == File.Type.TEXT) "Text file: ${file.content}" else null
+fun parsePresentation(file: File) = if (file.type == File.Type.PRESENTATION) "Presentation file: ${file.content}" else null
+fun parseAudio(file: File) = if (file.type == File.Type.AUDIO) "Audio file: ${file.content}" else null
+fun parseVideo(file: File) = if (file.type == File.Type.VIDEO) "Video file: ${file.content}" else null
 
 fun main(args: Array<String>) {
     val file = File(File.Type.AUDIO, "Dream Theater  - The Astonishing")
 
     println(listOf(::parseText, ::parsePresentation, ::parseVideo, ::parseAudio)
-            .map { it(file) }
-            .filter { it.isPresent }
-            .first()
-            .orElseThrow { RuntimeException("Unknown file $file") }
-    )
+            .mapNotNull { it(file) }
+            .firstOrNull() ?: RuntimeException("Unknown file $file"))
 }
