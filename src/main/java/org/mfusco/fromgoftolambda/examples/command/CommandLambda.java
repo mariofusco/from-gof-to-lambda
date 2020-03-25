@@ -19,6 +19,7 @@ public class CommandLambda {
 
     public static void execute(List<Runnable> tasks ) {
         tasks.forEach( Runnable::run );
+        tasks.stream();
     }
 
     public static void main( String[] args ) {

@@ -5,24 +5,28 @@ import java.util.stream.Stream;
 
 public class DecoratorLambda {
 
-    public static class DefaultSalaryCalculator implements DoubleUnaryOperator {
-        @Override
-        public double applyAsDouble( double grossAnnual ) {
-            return grossAnnual / 12;
-        }
-    }
+//    public static class DefaultSalaryCalculator implements DoubleUnaryOperator {
+//        @Override
+//        public double applyAsDouble( double grossAnnual ) {
+//            return grossAnnual / 12;
+//        }
+//    }
 
-    public static void main( String[] args ) {
-        new DefaultSalaryCalculator()
-                .andThen( Taxes::generalTax )
-                .andThen( Taxes::regionalTax )
-                .andThen( Taxes::healthInsurance )
-                .applyAsDouble( 80000.00 );
+    public static void main(String[] args) {
 
-        calculateSalary( 80000.00, new DefaultSalaryCalculator(), Taxes::generalTax, Taxes::regionalTax, Taxes::healthInsurance );
+        DoubleUnaryOperator defaultSalaryCalculator = grossAnnual -> grossAnnual / 12;
+
+        defaultSalaryCalculator
+                .andThen(Taxes::generalTax)
+                .andThen(Taxes::regionalTax)
+                .andThen(Taxes::healthInsurance)
+                .applyAsDouble(80000.00);
+
+        calculateSalary(80000.00, defaultSalaryCalculator, Taxes::generalTax, Taxes::regionalTax, Taxes::healthInsurance);
     }
 
     public static double calculateSalary(double annualGross, DoubleUnaryOperator... taxes) {
-        return Stream.of(taxes).reduce( DoubleUnaryOperator.identity(), DoubleUnaryOperator::andThen ).applyAsDouble( annualGross );
+        DoubleUnaryOperator function = Stream.of(taxes).reduce(DoubleUnaryOperator.identity(), DoubleUnaryOperator::andThen);
+        return function.applyAsDouble(annualGross);
     }
 }

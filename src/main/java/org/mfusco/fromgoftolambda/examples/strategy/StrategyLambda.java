@@ -14,6 +14,7 @@ public class StrategyLambda {
     }
 
     public static void main( String[] args ) {
+        publishText( "Plain text - I'm here", s -> true, s -> s );
         publishText( "ERROR - something bad happened", s -> true, String::toUpperCase );
         publishText( "DEBUG - I'm here", s -> s.length() < 20, String::toLowerCase );
     }
