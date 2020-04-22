@@ -1,1 +1,4 @@
 language: java
+
+script:
+  - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then bash ./travis/spelling check; fi'
