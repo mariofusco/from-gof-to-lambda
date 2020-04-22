@@ -2,4 +2,5 @@ language: java
 
 script:
   - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then echo "helloo"; fi'
-  - - 'if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo "not helloo"; fi'
+  - 'if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo "not helloo"; fi'
+  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then echo "not helloo"; fi'
