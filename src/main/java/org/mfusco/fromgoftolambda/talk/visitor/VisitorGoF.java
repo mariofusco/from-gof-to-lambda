@@ -4,12 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class VisitorGoF {
-    interface Visitor<T> {
-        T visit( Element element );
-    }
-
     interface Element {
-        <T> T accept( Visitor<T> visitor );
+        <T> T accept(Visitor<T> visitor);
     }
 
     public static class Square implements Element {
@@ -53,26 +49,13 @@ public class VisitorGoF {
         }
     }
 
-    public static abstract class AbstractVisitor<T> implements Visitor<T> {
-        @Override
-        public T visit( Element element ) {
-            if ( element instanceof Square ) {
-                return visit( ( (Square) element ) );
-            } else if ( element instanceof Circle ) {
-                return visit( ( (Circle) element ) );
-            } else if ( element instanceof Rectangle ) {
-                return visit( ( (Rectangle) element ) );
-            }
-            throw new RuntimeException( "Unknown element type" );
-        }
-
-        public abstract T visit( Square element );
-        public abstract T visit( Circle element );
-        public abstract T visit( Rectangle element );
+    interface Visitor<T> {
+        T visit(Square element);
+        T visit(Circle element);
+        T visit(Rectangle element);
     }
 
-    public static class AreaVisitor extends AbstractVisitor<Double> {
-
+    public static class AreaVisitor implements Visitor<Double> {
         public Double visit( Square element ) {
             return element.side * element.side;
         }
@@ -86,8 +69,7 @@ public class VisitorGoF {
         }
     }
 
-    public static class PerimeterVisitor extends AbstractVisitor<Double> {
-
+    public static class PerimeterVisitor implements Visitor<Double> {
         public Double visit( Square element ) {
             return 4 * element.side ;
         }

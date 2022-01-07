@@ -92,11 +92,9 @@ public class InterpreterGof {
         Stack<Expression> stack = new Stack<>();
         for (String s : expression.split(" ")) {
             if (isOperator(s)) {
-                Expression rightExpression = stack.pop();
-                Expression leftExpression = stack.pop();
-                Expression operator = getOperator(s, leftExpression, rightExpression);
-                int result = operator.interpret();
-                stack.push(new Number(result));
+                Expression right = stack.pop();
+                Expression left = stack.pop();
+                stack.push(getOperator(s, left, right));
             } else {
                 Expression i = new Number(Integer.parseInt(s));
                 stack.push(i);
